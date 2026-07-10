@@ -35,10 +35,10 @@ router.post("/", protectRoute, async (req, res) => {
   }
 });
 
-// const response = await fetch("http://localhost:3000/api/books?page=1&limit=5")
-
 // pagination => infinite loading
 router.get("/", protectRoute, async (req, res) => {
+  // Example call from react native - frontend
+  // const response = await fetch("http://localhost:3000/api/books?page=1&limit=5")
   try {
     const page = req.query.page || 1;
     const limit = req.query.page || 5;
@@ -49,13 +49,13 @@ router.get("/", protectRoute, async (req, res) => {
       .limit(limit)
       .populate("user", "username profileImage");
 
-    const totalBooks = await Book.countDocuments()
+    const totalBooks = await Book.countDocuments();
 
     res.send({
-        books,
-        currentPage: page,
-        totalBooks,
-        totalPages: Math.ceil(totalBooks / limit)
+      books,
+      currentPage: page,
+      totalBooks,
+      totalPages: Math.ceil(totalBooks / limit),
     });
   } catch (error) {
     console.log("Error in get all books route", error);
@@ -63,4 +63,47 @@ router.get("/", protectRoute, async (req, res) => {
   }
 });
 
+// Get recommended books by the logged user
+router.get("/user", protectRoute, async (req, res) => {
+  try {
+    const books = await Book.find({ user: req.user._id }).sort({
+      createdAt: -1,
+    });
+    res.json(books);
+  } catch (error) {
+    console.log("Get user books error:", error.message);
+    res.status(500).json({ message: "server error" });
+  }
+});
+
+router.delete("/:id", protectRoute, async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    // Check if user id the creator of the book
+    if (book.user.toString() != req.user._id.toString()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Delete image from cloudinary  as well
+    if (book.image && book.image.includes("cloudinary")) {
+      try {
+        const publicId = book.image.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(publicId);
+      } catch (deleteError) {
+        console.log("Error deleting image from cloudinary", deleteError);
+      }
+    }
+
+    await book.deleteOne();
+
+    res.json({ message: "Bookk deleted successfully" });
+  } catch (error) {
+    console.log("Error deleting book", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 export default router;
