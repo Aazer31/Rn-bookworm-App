@@ -17,6 +17,10 @@ app.use(cors())
 app.use("/api/auth", authRoutes)
 app.use("/api/books", bookRoutes)
 
+app.get("/", (req, res) => {
+    res.status(200).send("API is running perfectly!");
+});
+
 app.listen(PORT, ()=>{
     console.log(`Server running on port ${PORT}`)
     connectDB()
