@@ -1,10 +1,8 @@
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Platform } from "react-native";
 
-const API_URL = Platform.OS === "web" 
-  ? "http://localhost:3000" 
-  : "http://192.168.100.4:3000";
+// Ton API de production unique sur Render !
+const API_URL = "https://bookworm-api-r5xu.onrender.com";
 
 export const useAuthStore = create((set) => ({
   user: null,
@@ -27,7 +25,6 @@ export const useAuthStore = create((set) => ({
         throw new Error(data.message || "Something went wrong");
       }
 
-      // Ton code original d'AsyncStorage :
       await AsyncStorage.setItem("user", JSON.stringify(data.user));
       await AsyncStorage.setItem("token", data.token);
 
