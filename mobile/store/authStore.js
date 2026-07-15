@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Ton API de production unique sur Render !
+
 const API_URL = "https://bookworm-api-r5xu.onrender.com";
 
 export const useAuthStore = create((set) => ({
