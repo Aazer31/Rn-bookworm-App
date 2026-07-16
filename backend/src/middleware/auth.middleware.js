@@ -2,15 +2,6 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import "dotenv/config"
 
-// const response = await fetch(`http://localhost:3000/api/books`, {
-//   method: "POST",
-//   body: JSON.stringify({
-//     title,
-//     caption
-//   }),
-//   headers: { Authorization: `Bearer ${token}` },
-// });
-
 const protectRoute = async (req, res, next) => {
   try {
     // get token

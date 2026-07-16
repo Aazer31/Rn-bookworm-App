@@ -13,11 +13,11 @@ router.post("/", protectRoute, async (req, res) => {
       return res.status(400).json({ message: "Please provide all fields" });
     }
 
-    // Upload the image to cloudinary
+    // upload the image to cloudinary
     const uploadResponse = await cloudinary.uploader.upload(image);
     const imageUrl = uploadResponse.secure_url;
 
-    // Save to the database
+    // save to the database
     const newBook = new Book({
       title,
       caption,
@@ -37,14 +37,15 @@ router.post("/", protectRoute, async (req, res) => {
 
 // pagination => infinite loading
 router.get("/", protectRoute, async (req, res) => {
-  // Example call from react native - frontend
-  // const response = await fetch("http://localhost:3000/api/books?page=1&limit=5")
+  // example call from react native - frontend
+  // const response = await fetch("http://localhost:3000/api/books?page=1&limit=5");
   try {
     const page = req.query.page || 1;
-    const limit = req.query.page || 5;
+    const limit = req.query.limit || 2;
     const skip = (page - 1) * limit;
+
     const books = await Book.find()
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1 }) // desc
       .skip(skip)
       .limit(limit)
       .populate("user", "username profileImage");
@@ -63,32 +64,28 @@ router.get("/", protectRoute, async (req, res) => {
   }
 });
 
-// Get recommended books by the logged user
+// get recommended books by the logged in user
 router.get("/user", protectRoute, async (req, res) => {
   try {
-    const books = await Book.find({ user: req.user._id }).sort({
-      createdAt: -1,
-    });
+    const books = await Book.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json(books);
   } catch (error) {
-    console.log("Get user books error:", error.message);
-    res.status(500).json({ message: "server error" });
+    console.error("Get user books error:", error.message);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 router.delete("/:id", protectRoute, async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
-    if (!book) {
-      return res.status(404).json({ message: "Book not found" });
-    }
+    if (!book) return res.status(404).json({ message: "Book not found" });
 
-    // Check if user id the creator of the book
-    if (book.user.toString() != req.user._id.toString()) {
+    // check if user is the creator of the book
+    if (book.user.toString() !== req.user._id.toString())
       return res.status(401).json({ message: "Unauthorized" });
-    }
 
-    // Delete image from cloudinary  as well
+    // https://res.cloudinary.com/de1rm4uto/image/upload/v1741568358/qyup61vejflxxw8igvi0.png
+    // delete image from cloduinary as well
     if (book.image && book.image.includes("cloudinary")) {
       try {
         const publicId = book.image.split("/").pop().split(".")[0];
@@ -100,10 +97,11 @@ router.delete("/:id", protectRoute, async (req, res) => {
 
     await book.deleteOne();
 
-    res.json({ message: "Bookk deleted successfully" });
+    res.json({ message: "Book deleted successfully" });
   } catch (error) {
     console.log("Error deleting book", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
 export default router;

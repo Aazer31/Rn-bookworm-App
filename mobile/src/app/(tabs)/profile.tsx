@@ -4,7 +4,7 @@ import React from 'react'
 export default function Profile() {
   return (
     <View>
-      <Text>Profile tabs</Text>
+      <Text>rofile tabs</Text>
     </View>
   )
 }
