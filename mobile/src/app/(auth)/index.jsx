@@ -20,15 +20,15 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { isLoading, login } = useAuthStore();
+  const { isLoading, login, isCheckingAuth } = useAuthStore();
 
   const handleLogin = async () => {
     const result = await login(email, password);
 
-    if (!result.success) {
-      Alert.alert("Error", result.error);
-    }
+    if (!result.success) Alert.alert("Error", result.error);
   };
+
+  if (isCheckingAuth) return null;
 
   return (
     <KeyboardAvoidingView
@@ -36,6 +36,7 @@ export default function Login() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.container}>
+        {/* ILLUSTRATION */}
         <View style={styles.topIllustration}>
           <Image
             source={require("../../../assets/images/i.png")}
@@ -46,7 +47,7 @@ export default function Login() {
 
         <View style={styles.card}>
           <View style={styles.formContainer}>
-            {/* Email */}
+            {/* EMAIL */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
               <View style={styles.inputContainer}>
@@ -68,7 +69,7 @@ export default function Login() {
               </View>
             </View>
 
-            {/* Password */}
+            {/* PASSWORD */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
               <View style={styles.inputContainer}>
@@ -101,11 +102,8 @@ export default function Login() {
                 </TouchableOpacity>
               </View>
             </View>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={handleLogin}
-              disabled={isLoading}
-            >
+
+            <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={isLoading}>
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
@@ -122,7 +120,7 @@ export default function Login() {
                 </TouchableOpacity>
               </Link>
             </View>
-          </View>
+          </View>git
         </View>
       </View>
     </KeyboardAvoidingView>
